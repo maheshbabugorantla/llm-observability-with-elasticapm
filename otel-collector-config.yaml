@@ -1,0 +1,66 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+  resource:
+    attributes:
+      - key: service.name
+        action: upsert
+        value: recipe-generator-service # This is the service name that will be used to identify the service in the APM Server
+
+exporters:
+  # Export to APM Server via OTLP
+  otlp/apm:
+    endpoint: apm-server:8200 # This is the endpoint of the APM Server
+    tls:
+      insecure: true # This is to allow the collector to connect to the APM Server without a certificate
+    compression: gzip
+
+  # Logging exporter for debugging
+  logging:
+    verbosity: normal # This is the verbosity of the logging
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # Debug exporter to verify trace data
+  debug:
+    verbosity: detailed
+    sampling_initial: 10
+    sampling_thereafter: 10
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133 # This is the endpoint of the OpenTelemetry Collector's health check extension
+  
+
+service:
+  extensions: [health_check] # This is to enable the health check extension
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp/apm, logging, debug]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlp/apm, logging]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlp/apm, logging]
