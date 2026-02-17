@@ -26,6 +26,8 @@ Flask App → OpenLLMetry SDK → OTel Collector → APM Server → Elasticsearc
 | APM Server | `elastic/apm-server:8.11.0` | 8200 |
 | Flask App | Local build | [localhost:5001](http://localhost:5001) |
 
+> **Cost warning:** Running the test workflows makes real API calls to OpenAI and Anthropic. A full test run costs approximately $0.50–$2.00. Monitor your provider dashboards.
+
 ---
 
 ## Quick Start
@@ -34,7 +36,7 @@ Flask App → OpenLLMetry SDK → OTel Collector → APM Server → Elasticsearc
 
 ```bash
 git clone https://github.com/maheshbabugorantla/llm-observability-with-elasticapm.git
-cd llm-observability-elastic
+cd llm-observability-with-elasticapm
 cp .env.example .env
 ```
 
